@@ -1,4 +1,6 @@
 const express = require('express');
+import { Novu } from '@novu/node';
+
 const app = express();
 
 // Middleware to parse JSON bodies
@@ -18,6 +20,8 @@ app.post('/webhook', (req, res) => {
     console.log(`Subject URL: ${data.subject.url}`);
     console.log(`Repository Name: ${data.repository.name}`);
     console.log(`Repository Full Name: ${data.repository.full_name}`);
+    
+    triggerNotification()
   } else {
     console.log('No data found in webhook payload');
   }
@@ -30,3 +34,24 @@ const port = 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
+
+const novu = new Novu('2875855f499c71df394ed5b2fefb4c6c');
+
+async function triggerNotification(data) {
+  await novu.trigger('untitled-AfEiPb8-E', {
+    to: {
+        subscriberId: '1234567',
+        email: "emil@novu.co"
+    },
+    payload: {
+      // Your data fields here
+      reason: data.reason,
+      subjectType: data.subject.type,
+      subjectTitle: data.subject.title,
+      subjectURL: data.subject.url,
+      repositoryName: data.repository.name,
+      repositoryFullName: data.repository.full_name,
+    }
+  });
+}
